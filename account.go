@@ -42,6 +42,25 @@ func initDB() error {
 		amount REAL NOT NULL,
 		remark TEXT
 	);`
+	// `db.Exec` 用来执行**没有返回行**的 SQL：`CREATE TABLE`建表、INSERT、UPDATE、DELETE。
+
+	// >
+	// > ✅ 建表语句 `sqlCreate` 正好适合用 Exec；查询 SELECT 要用`db.Query`/`db.QueryRow`，**不能用 Exec**。
+
+	// ## 2. 两个返回值
+
+	// 1. **第一个返回值：`sql.Result`**
+	// 里面两个方法：
+
+	// >
+	// > 👉 **下划线 `_` = 空白标识符**：代表**我不需要这个返回值，直接丢弃**。
+	// > 建表的时候，我们不需要获取新增 ID、影响行数，所以直接用`_`丢掉。
+	//    - `LastInsertId()`：拿到自增 ID（插入新记录才有用）
+	//    - `RowsAffected()`：拿到本次 SQL 影响了多少行（更新 / 删除才有用）
+	// 2. **第二个返回值：`err error`**
+	// 最重要！用来判断 SQL 执行**有没有报错**。
+	//    - `err == nil`：执行成功
+	//    - `err != nil`：失败（表已存在、语法错误、数据库连接失败等）
 	_, err = db.Exec(sqlCreate)
 	if err != nil {
 		return err
@@ -163,6 +182,7 @@ func delRecord() {
 	var idStr string
 	fmt.Print("输入要删除记录ID：")
 	fmt.Scan(&idStr)
+	// `strconv.Atoi` = **string to int**，把字符串转成整数
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		fmt.Println("ID非法")
